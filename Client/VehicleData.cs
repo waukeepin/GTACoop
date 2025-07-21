@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -150,7 +150,15 @@ namespace GTACoOp
         IsShooting = 1 << 1,
         IsAiming = 1 << 2,
         IsParachuteOpen = 1 << 3,
-        IsInParachuteFreeFall = 1 << 4
+        IsInParachuteFreeFall = 1 << 4,
+        IsInCover = 1 << 5,
+        IsWalking = 1 << 6,
+        IsInMeleeCombat = 1 << 7,
+    }
+
+    public enum PedDataFlags2: int
+    {
+        IsSprinting = 1 << 0
     }
 
     [ProtoContract]
@@ -178,6 +186,8 @@ namespace GTACoOp
         public Dictionary<int, int> PedProps { get; set; }
         [ProtoMember(11)]
         public byte? Flag { get; set; } = 0;
+
+        public int? Flag2 { get; set; } = 0;
     }
 
     [ProtoContract]
