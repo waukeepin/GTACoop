@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using GTA;
 using GTA.Math;
 using GTA.Native;
 using GTA.UI;
 using LemonUI.Elements;
+//using NAudio.Utils;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace GTACoOp
 {
@@ -26,6 +30,12 @@ namespace GTACoOp
         public Quaternion Rotation;
         public bool IsInVehicle;
         public bool IsJumping;
+
+        public bool IsInCover;
+        public bool IsWalking;
+        public bool IsInMeleeCombat;
+        public bool IsSprinting;
+
         public int ModelHash;
         public int CurrentWeapon;
         public bool IsShooting;
@@ -154,6 +164,13 @@ namespace GTACoOp
         private DateTime _secondToLastUpdateReceived;
         private bool _lastShooting;
         private bool _lastJumping;
+
+        private bool _lastInCover;
+        private bool _lastWalking;
+        private bool _lastMeleeCombat;
+        private bool _lastSprinting;
+
+
         private bool _blip;
         private bool _justEnteredVeh;
         private DateTime _lastHornPress = DateTime.Now;
@@ -193,6 +210,7 @@ namespace GTACoOp
 
         private int _lastUpdateReceived;
         private float _speed;
+
 
         public void DisplayLocally()
         {
@@ -316,7 +334,23 @@ namespace GTACoOp
 
                         MainVehicle.Quaternion = VehicleRotation;
                         MainVehicle.IsInvincible = true;
+                        //Character.Task.PlayAnimation("random@peyote@bird", "wakeup");
+                        //Character.Task.EnterVehicle(MainVehicle, (VehicleSeat)VehicleSeat);
+
+                        //Character.Task.PlayAnimation("random@peyote@bird", "wakeup");
+
+
+                        //if (Function.Call<bool>(Hash.TASK_ENTER_VEHICLE, Character, "random@peyote@bird", "wakeup") )
+                        //{
+                        //    Function.Call(Hash.TASK_ENTER_VEHICLE, Character, MainVehicle, 1, -1, 1, 16, 0);
+                        //    Notification.Show("Test is running anim");
+                        //}
+
+                        //Function.Call(Hash.TASK_ENTER_VEHICLE, Character, MainVehicle,1, -1, 1, 16, 0);
+
+
                         Character.SetIntoVehicle(MainVehicle, (VehicleSeat)VehicleSeat);
+
 
                         /*if (_playerSeat != -2 && !Game.Player.Character.IsInVehicle(_mainVehicle))
                         { // TODO: Fix me.
@@ -512,7 +546,91 @@ namespace GTACoOp
                     if (!_lastJumping && IsJumping)
                     {
                         Character.Task.Jump();
+                        //Character.Task.HandsUp(300);
+                        Notification.Show("Player jumping");
                     }
+
+                    if (!_lastInCover && IsInCover)
+                    {
+                        //Character.Task.HandsUp(300);
+                        Character.Task.PlayAnimation("cover@move@base@core", "low_idle_l", 5.0f, 5.0f, -1, AnimationFlags.Loop, 1.0f);
+
+                        Notification.Show("Player in Cover && not moving");
+
+                        //if (Function.Call<bool>(Hash.IS_ENTITY_PLAYING_ANIM, Character, "cover@move@base@core", "low_idle_l", 3) == false)
+                        //{
+                        //    Character.Task.PlayAnimation("cover@move@base@core", "low_idle_l");
+                        //    Notification.Show("Player in Cover");
+                        //}
+
+
+                    }
+
+                    //if (IsInMeleeCombat && !IsWalking & !IsSprinting)
+                    //{
+                    //    //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a", 8.0f, 8.0f, 1000, AnimationFlags.None, 0.0f);
+                    //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "heavy_punch_a", 0.0f, -0.25f, -1, AnimationFlags.None, 0.0f);
+
+                    //    Notification.Show("Player IsInMeleeCombat not moving");
+                    //}
+
+
+                    //if (!_lastInCover && IsInCover & IsWalking)
+                    //{
+                    //    //Character.Task.HandsUp(300);
+                    //    Character.Task.PlayAnimation("cover@move@base@core", "low_l_walkstart", 8.0f, -8.0f, -1, AnimationFlags.None, 0.0f);
+
+                    //    Notification.Show("Player in Cover, moving");
+
+
+                    //}
+
+
+
+
+
+                    //if (IsInMeleeCombat && IsWalking)
+                    //{
+                    //    //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "heavy_punch_a", 0.0f, -0.25f, -1, AnimationFlags.None, 0.0f);
+
+                    //    Notification.Show("Player IsInMeleeCombat && walking");
+                    //}
+
+                    //if (IsWalking)
+                    //{
+                    //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //    Notification.Show("Player walking");
+                    //}
+
+                    //if (IsSprinting)
+                    //{
+                    //    //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //    //Notification.Show("Player sprinting");
+
+                    //    if (IsInMeleeCombat)
+                    //    {
+                    //        Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //        Notification.Show("Player sprinting && melee");
+                    //    }
+                    //}
+
+
+
+
+                    //if (IsSprinting && IsInMeleeCombat && Character.IsInRange(Position, 0.5f))
+                    //{
+                    //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //    Notification.Show("Player IsSprinting");
+                    //}
+
+                    //if (IsWalking && IsInMeleeCombat && Character.IsInRange(Position, 0.5f))
+                    //{
+                    //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, 0.0f, -1, AnimationFlags.None, 0.0f);
+                    //    Notification.Show("Player IsSprinting");
+                    //}
+
+
 
                     if (IsParachuteOpen)
                     {
@@ -543,31 +661,97 @@ namespace GTACoOp
                             _parachuteProp = null;
                         }
 
+
                         const int threshold = 50;
                         if (IsAiming && !IsShooting && !Character.IsInRange(Position, 0.5f) && _switch%threshold == 0)
                         {
                             Function.Call(Hash.TASK_GO_TO_COORD_WHILE_AIMING_AT_COORD, Character.Handle, dest.X, dest.Y,
                                 dest.Z, AimCoords.X, AimCoords.Y, AimCoords.Z, 2f, 0, 0x3F000000, 0x40800000, 1, 512, 0,
-                                (uint) FiringPattern.FullAuto);
+                                (uint)FiringPattern.FullAuto);
+
+                            //if (Character.Weapons.Current.Hash == WeaponHash.Unarmed)
+                            //{
+                            //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+                            //}
+                            //else
+                            //{
+                            //    Function.Call(Hash.TASK_GO_TO_COORD_WHILE_AIMING_AT_COORD, Character.Handle, dest.X, dest.Y,
+                            //    dest.Z, AimCoords.X, AimCoords.Y, AimCoords.Z, 2f, 0, 0x3F000000, 0x40800000, 1, 512, 0,
+                            //    (uint)FiringPattern.FullAuto);
+                            //}
+
+                            //Notification.Show("Case 1");
                         }
+                        //aiming not shooting in range
                         else if (IsAiming && !IsShooting && Character.IsInRange(Position, 0.5f))
                         {
                             Character.Task.AimAt(AimCoords, 100);
-                        }
 
+                            //Character.Task.PlayAnimation("random@peyote@bird", "wakeup");
+                            //if (Function.Call<bool>(Hash.IS_ENTITY_PLAYING_ANIM, Character, "melee@unarmed@streamed_core", "kick_close_a", 3) == true)
+                            //{
+                            //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+                            //}
+                            //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+
+                            //if (Character.Weapons.Current.Hash == WeaponHash.Unarmed)
+                            //{
+                            //    //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+                            //    Character.Task.PlayAnimation("melee@unarmed@streamed_variations", "melee_intro_a");
+
+                            //}
+                            //else
+                            //{
+                            //    Character.Task.AimAt(AimCoords, 100);
+                            //}
+                            //Notification.Show("Case 2");
+
+
+                        }
+                        //not in range, shooting or is shooting switch?
                         if (!Character.IsInRange(Position, 0.5f) &&
                             ((IsShooting && !_lastShooting) ||
                              (IsShooting && _lastShooting && _switch%(threshold*2) == 0)))
                         {
                             Function.Call(Hash.TASK_GO_TO_COORD_WHILE_AIMING_AT_COORD, Character.Handle, dest.X, dest.Y,
                                 dest.Z, AimCoords.X, AimCoords.Y, AimCoords.Z, 2f, 1, 0x3F000000, 0x40800000, 1, 0, 0,
-                                (uint) FiringPattern.FullAuto);
+                                (uint)FiringPattern.FullAuto);
+
+                            //if (Character.Weapons.Current.Hash == WeaponHash.Unarmed)
+                            //{
+                            //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+                            //    Function.Call(Hash.TASK_GO_TO_COORD_WHILE_AIMING_AT_COORD, Character.Handle, dest.X, dest.Y,
+                            //        dest.Z, AimCoords.X, AimCoords.Y, AimCoords.Z, 2f, 1, 0x3F000000, 0x40800000, 1, 0, 0,
+                            //        (uint)FiringPattern.FullAuto);
+                            //}
+                            //else
+                            //{
+                            //    Function.Call(Hash.TASK_GO_TO_COORD_WHILE_AIMING_AT_COORD, Character.Handle, dest.X, dest.Y,
+                            //        dest.Z, AimCoords.X, AimCoords.Y, AimCoords.Z, 2f, 1, 0x3F000000, 0x40800000, 1, 0, 0,
+                            //        (uint)FiringPattern.FullAuto);
+                            //}
+
+
+                            Notification.Show("Case 3");
                         }
+                        //is shooting?
                         else if ((IsShooting && !_lastShooting) ||
                                  (IsShooting && _lastShooting && _switch%(threshold/2) == 0))
                         {
                             Function.Call(Hash.TASK_SHOOT_AT_COORD, Character.Handle, AimCoords.X, AimCoords.Y,
-                                AimCoords.Z, 1500, (uint) FiringPattern.FullAuto);
+                                AimCoords.Z, 1500, (uint)FiringPattern.FullAuto);
+
+                            //if (Character.Weapons.Current.Hash == WeaponHash.Unarmed)
+                            //{
+                            //    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a");
+                            //}
+                            //else
+                            //{
+                            //    Function.Call(Hash.TASK_SHOOT_AT_COORD, Character.Handle, AimCoords.X, AimCoords.Y,
+                            //    AimCoords.Z, 1500, (uint) FiringPattern.FullAuto);
+                            //}
+                            Notification.Show("Case 4");
+
                         }
 
                         if (!IsAiming && !IsShooting && !IsJumping && !IsInParachuteFreeFall)
@@ -580,23 +764,42 @@ namespace GTACoOp
                                     Character.Position = dest - new Vector3(0, 0, 1f);
                                     Character.Quaternion = Rotation;
                                 }
+
+                                if (IsInMeleeCombat && !IsWalking & !IsSprinting)
+                                {
+                                    //Character.Task.PlayAnimation("melee@unarmed@streamed_core", "kick_close_a", 8.0f, 8.0f, 1000, AnimationFlags.None, 0.0f);
+                                    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "heavy_punch_a", 0.0f, -0.25f, -1, AnimationFlags.None, 0.0f);
+
+                                    Notification.Show("Player IsInMeleeCombat not moving");
+                                }
                             }
                             else if (distance <= 1.25f) // Walking
                             {
                                 Function.Call(Hash.TASK_GO_STRAIGHT_TO_COORD, Character, Position.X, Position.Y, Position.Z, 1.0f, -1, Character.Heading, 0.0f);
                                 Function.Call(Hash.SET_PED_DESIRED_MOVE_BLEND_RATIO, Character, 1.0f);
+
                             }
                             else if (distance > 1.75f) // Sprinting
                             {
-                                Function.Call(Hash.TASK_GO_STRAIGHT_TO_COORD, Character, Position.X, Position.Y, Position.Z, 3.0f, -1, Character.Heading, 2.0f);
-                                Function.Call(Hash.SET_RUN_SPRINT_MULTIPLIER_FOR_PLAYER, Character, 1.49f);
-                                Function.Call(Hash.SET_PED_DESIRED_MOVE_BLEND_RATIO, Character, 3.0f);
+                                if(!IsInMeleeCombat)
+                                {
+                                    Function.Call(Hash.TASK_GO_STRAIGHT_TO_COORD, Character, Position.X, Position.Y, Position.Z, 3.0f, -1, Character.Heading, 2.0f);
+                                    Function.Call(Hash.SET_RUN_SPRINT_MULTIPLIER_FOR_PLAYER, Character, 1.49f);
+                                    Function.Call(Hash.SET_PED_DESIRED_MOVE_BLEND_RATIO, Character, 3.0f);
+                                }
+
+                                if (IsInMeleeCombat)
+                                {
+                                    Character.Task.PlayAnimation("melee@unarmed@streamed_core", "walking_punch", 0.0f, -0.25f, -1, AnimationFlags.None, 0.0f);
+                                    Notification.Show("Player sprinting && melee");
+                                }
                             }
                             else // Running
                             {
                                 Function.Call(Hash.TASK_GO_STRAIGHT_TO_COORD, Character, Position.X, Position.Y, Position.Z, 4.0f, -1, Character.Heading, 1.0f);
                                 Function.Call(Hash.SET_PED_DESIRED_MOVE_BLEND_RATIO, Character, 2.0f);
                             }
+                            Notification.Show("Case 5");
                         }
 
                         if (IsInParachuteFreeFall)
@@ -610,6 +813,13 @@ namespace GTACoOp
                     _lastJumping = IsJumping;
                     _lastShooting = IsShooting;
                     _lastAiming = IsAiming;
+
+                    _lastInCover = IsInCover;
+                    _lastWalking = IsWalking;
+                    _lastMeleeCombat = IsInMeleeCombat;
+
+                    _lastSprinting = IsSprinting;
+
                 }
                 _lastVehicle = IsInVehicle;
             }
