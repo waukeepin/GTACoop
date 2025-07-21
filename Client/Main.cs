@@ -630,6 +630,7 @@ namespace GTACoOp
         private static int _tickRate = 60;
         private static int _lastFullDataSend;
 
+        //PLAYER DATA PART
         public static void SendPlayerData()
         {
             if (Game.GameTime - _lastDataSend < 1000 / _tickRate) return;
@@ -721,6 +722,8 @@ namespace GTACoOp
                 obj.WeaponHash = (int)player.Weapons.Current.Hash;
                 obj.PlayerHealth = player.Health;
 
+
+
                 if (Game.GameTime >= _lastFullDataSend + 3000)
                 {
                     _lastFullDataSend = Game.GameTime;
@@ -737,6 +740,17 @@ namespace GTACoOp
                     obj.Flag |= (byte)PedDataFlags.IsParachuteOpen;
                 if (Function.Call<bool>(Hash.IS_PED_IN_PARACHUTE_FREE_FALL, player.Handle))
                     obj.Flag |= (byte)PedDataFlags.IsInParachuteFreeFall;
+
+                if (Function.Call<bool>(Hash.IS_PED_IN_COVER, player, 0))
+                    obj.Flag |= (byte)PedDataFlags.IsInCover;
+                if (player.IsWalking)
+                    obj.Flag |= (byte)PedDataFlags.IsWalking;
+                if (player.IsInMeleeCombat)
+                    obj.Flag |= (byte)PedDataFlags.IsInMeleeCombat;
+
+
+                if (player.IsSprinting)
+                    obj.Flag2 |= (int)PedDataFlags2.IsSprinting;
 
                 var bin = SerializeBinary(obj);
 
@@ -832,6 +846,19 @@ namespace GTACoOp
                     obj.Flag |= (byte)PedDataFlags.IsParachuteOpen;
                 if (Function.Call<bool>(Hash.IS_PED_IN_PARACHUTE_FREE_FALL, ped.Handle))
                     obj.Flag |= (byte)PedDataFlags.IsInParachuteFreeFall;
+
+                if (Function.Call<bool>(Hash.IS_PED_IN_COVER, ped, 0))
+                    obj.Flag |= (byte)PedDataFlags.IsInCover;
+                if (ped.IsWalking)
+                    obj.Flag |= (byte)PedDataFlags.IsWalking;
+                if (ped.IsInMeleeCombat)
+                    obj.Flag |= (byte)PedDataFlags.IsInMeleeCombat;
+
+                if (ped.IsSprinting)
+                    obj.Flag2 |= (int)PedDataFlags2.IsSprinting;
+
+
+
 
                 var bin = SerializeBinary(obj);
 
@@ -1235,6 +1262,13 @@ namespace GTACoOp
                                     Opponents[data.Id].CurrentWeapon = data.WeaponHash;
                                     Opponents[data.Id].IsAiming = (data.Flag & (byte)PedDataFlags.IsAiming) > 0;
                                     Opponents[data.Id].IsJumping = (data.Flag & (byte)PedDataFlags.IsJumping) > 0;
+
+                                    Opponents[data.Id].IsInCover = (data.Flag & (byte)PedDataFlags.IsInCover) > 0;
+                                    Opponents[data.Id].IsWalking = (data.Flag & (byte)PedDataFlags.IsWalking) > 0;
+                                    Opponents[data.Id].IsInMeleeCombat = (data.Flag & (byte)PedDataFlags.IsInMeleeCombat) > 0;
+
+                                    Opponents[data.Id].IsSprinting = (data.Flag2 & (int)PedDataFlags2.IsSprinting) > 0;
+
                                     Opponents[data.Id].IsShooting = (data.Flag & (byte)PedDataFlags.IsShooting) > 0;
                                     Opponents[data.Id].Latency = data.Latency;
                                     Opponents[data.Id].IsParachuteOpen = (data.Flag & (byte)PedDataFlags.IsParachuteOpen) > 0;
@@ -1321,6 +1355,14 @@ namespace GTACoOp
                                     Npcs[data.Name].CurrentWeapon = data.WeaponHash;
                                     Npcs[data.Name].IsAiming = (data.Flag & (byte)PedDataFlags.IsAiming) > 0;
                                     Npcs[data.Name].IsJumping = (data.Flag & (byte)PedDataFlags.IsJumping) > 0;
+
+                                    Npcs[data.Name].IsInCover = (data.Flag & (byte)PedDataFlags.IsInCover) > 0;
+                                    Npcs[data.Name].IsWalking = (data.Flag & (byte)PedDataFlags.IsWalking) > 0;
+                                    Npcs[data.Name].IsInMeleeCombat = (data.Flag & (byte)PedDataFlags.IsInMeleeCombat) > 0;
+
+
+                                    Npcs[data.Name].IsSprinting = (data.Flag2 & (int)PedDataFlags2.IsSprinting) > 0;
+
                                     Npcs[data.Name].IsShooting = (data.Flag & (byte)PedDataFlags.IsShooting) > 0;
                                     Npcs[data.Name].IsParachuteOpen = (data.Flag & (byte)PedDataFlags.IsParachuteOpen) > 0;
                                     Npcs[data.Name].IsInParachuteFreeFall = (data.Flag & (byte)PedDataFlags.IsInParachuteFreeFall) > 0;
@@ -1512,7 +1554,7 @@ namespace GTACoOp
 
                             break;
                         case NetConnectionStatus.Connected:
-                            Notification.Show("Connection successful!");
+                            Notification.Show("HELLO USER!");
                             UpdateStatusText(null);
 
                             Util.DisplayHelpText("Press ~INPUT_MULTIPLAYER_INFO~ to view a list of online players");
@@ -1765,6 +1807,13 @@ namespace GTACoOp
                     _debugSyncPed.IsAiming = aiming;
                     _debugSyncPed.IsShooting = shooting;
                     _debugSyncPed.IsJumping = Function.Call<bool>(Hash.IS_PED_JUMPING, player.Handle);
+
+                    _debugSyncPed.IsInCover = Function.Call<bool>(Hash.IS_PED_IN_COVER, player, 0);
+                    _debugSyncPed.IsWalking = player.IsWalking;
+                    _debugSyncPed.IsInMeleeCombat = player.IsInMeleeCombat;
+
+                    _debugSyncPed.IsSprinting = player.IsSprinting;
+
                     _debugSyncPed.IsParachuteOpen = Function.Call<int>(Hash.GET_PED_PARACHUTE_STATE, Game.Player.Character.Handle) == 2;
                     _debugSyncPed.IsInVehicle = false;
                     _debugSyncPed.PedProps = Util.GetPlayerProps(player);
